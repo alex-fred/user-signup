@@ -1,187 +1,72 @@
 from flask import Flask, request, redirect, render_template
-
-import cgi
-import os
+import re
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
 
-# THIS CREATES ROUTE TO DISPLAY THE FORM
+@app.route('/', methods=['POST', 'GET'])
+def index():
 
-@app.route('/signup')
-def display_user_signup_form():
-    return render_template('main.html')
+    username = ''
+    email = ''
+    username_error = ''
+    password_error = ''
+    verify_password_error = ''
+    email_error = ''
+    title = 'Signup'
 
-# THESE ARE FUNCTIONS FOR THE VALIDATIONS
+    if request.method == 'POST':
 
-def empty_val(x):
-    if x:
-        return True
-    else:
-        return False
+        username = request.form['username']
+        password = request.form['password']
+        verify_password = request.form['verify_password']
+        email = request.form['email']
 
-def char_length(x):
-    if len(x) > 2 and len(x) < 21:
-        return True
-    else:
-        return False
+        for i in username:
+            #if there is a blank space in username, it's invalid
+            if i.isspace():
+                username_error = 'Username cannot contain spaces.'
+                username = ''
+            else:
+                #if username has fewer than 3 or greater than 20 characters, it's invalid
+                if (len(username) < 3) or (len(username) > 20):
+                    username_error = 'Username needs to be 3-20 characters.'
+                    username = ''
 
-def email_at_symbol(x):
-    if x.count('@') >= 1:
-        return True
-    else:
-        return False
+        if not username:
+            username_error = 'Not a valid username'
+            username = ''
 
-def email_at_symbol_more_than_one(x):
-    if x.count('@') <= 1:
-        return True
-    else:
-        return False
+        for i in password:
+            if i.isspace():
+                password_error = 'Password must not contain spaces.'
+            else:
+                if (len(password) < 3) or (len(password) > 20):
+                    password_error = 'Password must be 3-20 characters and not contain spaces.'
+        if not len(password):
+            password_error = 'Not a valid password'
 
-def email_period(x):
-    if x.count('.') >= 1:
-        return True
-    else:
-        return False
+        if password != verify_password:
+            verify_password_error = 'Passwords do not match.'
 
-def email_period_more_than_one(x):
-    if x.count('.') <= 1:
-        return True
-    else:
-        return False
+        if (email != '') and (not re.match('^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', email)):
+            email_error = 'This is not a valid email.'
+            email = ''
 
-# THIS CREATES ROUTE TO PROCESS AND VALIDATE THE FORM
+        if (not username_error) and (not password_error) and (not verify_password_error) and (not email_error):
+            return redirect('/welcome?username={0}'.format(username))
 
-@app.route("/signup", methods=['POST'])
-def user_signup_complete():
+    return render_template('new_user_signup.html', title=title, username=username, email=email,
+                           username_error=username_error, password_error=password_error,
+                           verify_password_error=verify_password_error, email_error=email_error)
 
-    # THIS CREATES VARIABLES FROM THE FORM INPUTS
-
-    username = request.form['username']
-    password = request.form['password']
-    password_validate = request.form['password_validate']
-    email = request.form['email']
-
-    # THIS CREATES EMPTY STRINGS FOR THE ERROR MESSAGES
-
-    username_error = ""
-    password_error = ""
-    password_validate_error = ""
-    email_error = ""
-
-    # THESE ARE THE ERROR MESSAGES THAT OCCUR MORE THAN ONCE
-
-    err_required = "Required field"
-    err_reenter_pw = "Please re-enter password"
-    err_char_count = "must be between 3 and 20 characters"
-    err_no_spaces = "must not contain spaces"
-
-    # THIS IS THE PASSWORD VALIDATION
-
-    if not empty_val(password):
-        password_error = err_required
-        password = ''
-        password_validate = ''
-    elif not char_length(password):
-        password_error = "Password " + err_char_count
-        password = ''
-        password_validate = ''
-        password_validate_error = err_reenter_pw
-    else:
-        if " " in password:
-            password_error = "Password " + err_no_spaces
-            password = ''
-            password_validate = ''
-            password_validate_error = err_reenter_pw
-
-    # THIS IS THE SECOND PASSWORD VALIDATION
-
-    if password_validate != password:
-        password_validate_error = "Passwords must match"
-        password = ''
-        password_validate = ''
-        password_error = 'Passwords must match'
-            
-
-    # THIS IS THE USERNAME VALIDATION
-
-    if not empty_val(username):
-        username_error = err_required
-        password = ''
-        password_validate = ''
-        password_error = err_reenter_pw
-        password_validate_error = err_reenter_pw
-    elif not char_length(username):
-        username_error = "Username " + err_char_count
-        password = ''
-        password_validate = ''
-        password_error = err_reenter_pw
-        password_validate_error = err_reenter_pw
-    else:
-        if " " in username:
-            username_error = "Username " + err_no_spaces
-            password = ''
-            password_validate = ''
-            password_error = err_reenter_pw
-            password_validate_error = err_reenter_pw
-
-    # THIS IS THE EMAIL VALIDATION
-
-    # checks to see if email contains text prior to running validations
-    if empty_val(email):
-        # validations start here
-        if not char_length(email):
-            email_error = "Email " + err_char_count
-            password = ''
-            password_validate = ''
-            password_error = err_reenter_pw
-            password_validate_error = err_reenter_pw
-        elif not email_at_symbol(email):
-            email_error = "Email must contain the @ symbol"
-            password = ''
-            password_validate = ''
-            password_error = err_reenter_pw
-            password_validate_error = err_reenter_pw
-        elif not email_at_symbol_more_than_one(email):
-            email_error = "Email must contain only one @ symbol"
-            password = ''
-            password_validate = ''
-            password_error = err_reenter_pw
-            password_validate_error = err_reenter_pw
-        elif not email_period(email):
-            email_error = "Email must contain ."
-            password = ''
-            password_validate = ''
-            password_error = err_reenter_pw
-            password_validate_error = err_reenter_pw
-        elif not email_period_more_than_one(email):
-            email_error = "Email must contain only one ."
-            password = ''
-            password_validate = ''
-            password_error = err_reenter_pw
-            password_validate_error = err_reenter_pw
-        else:
-            if " " in email:
-                email_error = "Email " + err_no_spaces
-                password = ''
-                password_validate = ''
-                password_error = err_reenter_pw
-                password_validate_error = err_reenter_pw
-
-    # IF THERE ARE NO ERRORS, THIS WILL REDIRECT TO WELCOME.HTML
-    # IF THERE ARE ERRORS, THIS WILL STAY ON THE MAIN.HTML (FORM) AND DISPLAY THE ERROR MSGS
-
-    if not username_error and not password_error and not password_validate_error and not email_error:
-        username = username
-        return redirect('/welcome?username={0}'.format(username))
-    else:
-        return render_template('main.html', username_error=username_error, username=username, password_error=password_error, password=password, password_validate_error=password_validate_error, password_validate=password_validate, email_error=email_error, email=email)
-
-# THIS REDIRECTS TO A WELCOME PAGE
 
 @app.route('/welcome')
-def valid_signup():
+def confirmation():
+    title = "Welcome!"
     username = request.args.get('username')
-    return render_template('welcome.html', username=username)
+    return render_template('welcome.html', title=title, username=username)
 
+
+if __name__ == '__main__':
 app.run()

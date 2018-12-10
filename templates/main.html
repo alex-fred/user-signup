@@ -1,27 +1,52 @@
-{% extends 'base.html' %}
+{% extends "base.html" %} {% block content %}
 
-{% block content %}    
-    
-    <h1>User Sign-up</h1>
-    <!--  form action needs to match the url you want it to go to after submit -->
-    <form method='POST'>
-        <label><span class="form_label">Username</span>
-            <input name="username" type="text" value='{{username}}' />
-        </label>
-        <p class="error">{{username_error}} &nbsp;</p>
-        <label><span class="form_label">Password</span>
-            <input name="password" type="password" value='{{password}}' />
-        </label>
-        <p class="error">{{password_error}} &nbsp;</p>
-        <label><span class="form_label">Password Validate</span>
-            <input name="password_validate" type="password" value='{{password_validate}}' />
-        </label>
-        <p class="error">{{password_validate_error}} &nbsp;</p>
-        <label><span class="form_label">E-mail (optional)</span>
-            <input name="email" type="text" value='{{email}}' />
-        </label>
-        <p class="error">{{email_error}} &nbsp;</p>
-        <input class="submit" type="submit" value="Submit" />
-    </form>
+<h1>Signup</h1>
+<form action='' method='POST'>
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    <label for="username">Username</label>
+                </td>
+                <td>
+                    <input name="username" type="text" value="{{ username }}">
+                    <span class="error">{{ username_error }}</span>
+                </td>
+            </tr>
 
-{% endblock %} 
+            <tr>
+                <td>
+                    <label for="password">Password</label>
+                </td>
+                <td>
+                    <input name="password" type="password">
+                    <span class="error">{{ password_error }}</span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <label for="verify_password">Verify Password</label>
+                </td>
+                <td>
+                    <input name="verify_password" type="password">
+                    <span class="error">{{ verify_password_error }}</span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <label for="email">Email (optional)</label>
+                </td>
+                <td>
+                    <input name="email" type="text" value="{{ email }}">
+                    <span class="error">{{ email_error }}</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <input type="submit" value="Submit">
+</form>
+
+{% endblock %}
