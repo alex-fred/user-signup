@@ -4,7 +4,7 @@ import re
 app = Flask(__name__)
 app.config['DEBUG'] = True
 
-@app.route('/', methods=['POST'])
+@app.route('/', methods=['POST', 'GET'])
 def index():
 
     username = ''
@@ -22,7 +22,6 @@ def index():
         verify_password = request.form['verify_password']
         email = request.form['email']
 
-        
         for i in username:
             #if there is a blank space in username, it's invalid
             if i.isspace():
@@ -63,7 +62,7 @@ def index():
 
 
 @app.route('/welcome')
-def confirmation():
+def welcome():
     title = "Welcome!"
     username = request.args.get('username')
     return render_template('welcome.html', title=title, username=username)
