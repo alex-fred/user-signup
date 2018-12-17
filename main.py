@@ -4,7 +4,7 @@ import re
 app = Flask(__name__)
 app.config['DEBUG'] = True
 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/', methods=['POST'])
 def index():
 
     username = ''
@@ -22,8 +22,8 @@ def index():
         verify_password = request.form['verify_password']
         email = request.form['email']
 
+        #if there is a blank space in username, it's invalid
         for i in username:
-            #if there is a blank space in username, it's invalid
             if i.isspace():
                 username_error = 'Username cannot contain spaces.'
                 username = ''
@@ -56,7 +56,7 @@ def index():
         if (not username_error) and (not password_error) and (not verify_password_error) and (not email_error):
             return redirect('/welcome?username={0}'.format(username))
 
-    return render_template('new_user_signup.html', title=title, username=username, email=email,
+    return render_template('main.html', title=title, username=username, email=email,
                            username_error=username_error, password_error=password_error,
                            verify_password_error=verify_password_error, email_error=email_error)
 
@@ -69,4 +69,4 @@ def confirmation():
 
 
 if __name__ == '__main__':
-app.run()
+    app.run()
