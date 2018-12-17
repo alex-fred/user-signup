@@ -22,8 +22,9 @@ def index():
         verify_password = request.form['verify_password']
         email = request.form['email']
 
-        #if there is a blank space in username, it's invalid
+        
         for i in username:
+            #if there is a blank space in username, it's invalid
             if i.isspace():
                 username_error = 'Username cannot contain spaces.'
                 username = ''
